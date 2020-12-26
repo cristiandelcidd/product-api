@@ -1,35 +1,55 @@
-import Product from '../models/Product'
+import Product from '../models/Product';
 
 export const createProduct = async ( req, res ) => {
-    const { name, category, price, imgUrl } = req.body;
-    const newProduct = new Product( { name, category, price, imgUrl } );
-    const productSaved = await newProduct.save();
-    res.status( 201 ).json( productSaved );
+    try {
+        const { name, category, price, imgUrl } = req.body;
+        const newProduct = new Product( { name, category, price, imgUrl } );
+        const productSaved = await newProduct.save();
+        res.status( 201 ).json({
+            ok: true,
+            product: productSaved
+        });
+    } catch (error) {
+        res.json({
+            ok: false,
+            error
+        })
+    }
 };
 
 export const getProductById = async ( req, res ) => {
     const id = req.params.productId;
     const product = await Product.findById( id )
-    res.json( product )
+    res.status( 200 ).json({
+        ok: true,
+        product
+    });
 };
 
 export const getProducts = async ( req, res ) => {
     const products = await Product.find( { available: true } );
-    res.json( products );
+    res.json({
+        ok: true,
+        products,
+    });
 };
 
 export const updateProductById = async ( req, res ) => {
+    const body = req.body;
     const id = req.params.productId;
-    const updatedProduct = await Product.findByIdAndUpdate( id, req.body, { new: true } )
-    res.json({
+    body.available = true;
+    const updatedProduct = await Product.findByIdAndUpdate( id, body, { new: true } )
+    res.status( 200 ).json({
+        ok: true,
         product: updatedProduct
-    })
+    });
 };
 
 export const deleteProductById = async ( req, res ) => {
     const id = req.params.productId;
-    const deletedProduct = await Product.findByIdAndUpdate( id, { available: false }, { new: true } );
+    const disabledProduct = await Product.findByIdAndUpdate( id, { available: false }, { new: true } );
     res.json({
-        product: deletedProduct
+        ok: true,
+        product: disabledProduct
     });
 };
